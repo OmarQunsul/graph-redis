@@ -798,8 +798,14 @@ void gedgeCommand(client *c) {
     return C_OK;
   }
 
-  GraphNode *graph_node1 = GraphGetOrAddNode(graph_object, sdsnew(c->argv[2]->ptr));
-  GraphNode *graph_node2 = GraphGetOrAddNode(graph_object, sdsnew(c->argv[3]->ptr));
+  sds key1 = sdsnew(c->argv[2]->ptr);
+  sds key2 = sdsnew(c->argv[3]->ptr);
+
+  GraphNode *graph_node1 = GraphGetOrAddNode(graph_object, key1);
+  GraphNode *graph_node2 = GraphGetOrAddNode(graph_object, key2);
+
+  sdsfree(key1);
+  sdsfree(key2);
 
   // Check whether the edge already exists
   edge = GraphGetEdge(graph_object, graph_node1, graph_node2);
