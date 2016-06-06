@@ -19,8 +19,6 @@ describe 'Minimum spanning tree' do
     redis.gmintree('graph1', 'graph2')
     min_tree = redis.gedges('graph2')
 
-    puts min_tree.inspect
-
     min_tree.length.should eq 4 * 3
   end
 
