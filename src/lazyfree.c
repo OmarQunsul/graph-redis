@@ -57,7 +57,7 @@ int dbAsyncDelete(redisDb *db, robj *key) {
     /* If the value is composed of a few allocations, to free in a lazy way
      * is actually just slower... So under a certain limit we just free
      * the object synchronously. */
-    dictEntry *de = dictFind(db->dict,key->ptr);
+    dictEntry *de = dictUnlink(db->dict,key->ptr);
     if (de) {
         robj *val = dictGetVal(de);
         size_t free_effort = lazyfreeGetFreeEffort(val);
@@ -65,7 +65,7 @@ int dbAsyncDelete(redisDb *db, robj *key) {
         /* If releasing the object is too much work, let's put it into the
          * lazy free list. */
         if (free_effort > LAZYFREE_THRESHOLD) {
-            atomicIncr(lazyfree_objects,1,&lazyfree_objects_mutex);
+            atomicIncr(lazyfree_objects,1,lazyfree_objects_mutex);
             bioCreateBackgroundJob(BIO_LAZY_FREE,val,NULL,NULL);
             dictSetVal(db->dict,de,NULL);
         }
@@ -73,7 +73,8 @@ int dbAsyncDelete(redisDb *db, robj *key) {
 
     /* Release the key-val pair, or just the key if we set the val
      * field to NULL in order to lazy free it later. */
-    if (dictDelete(db->dict,key->ptr) == DICT_OK) {
+    if (de) {
+        dictFreeUnlinkedEntry(db->dict,de);
         if (server.cluster_enabled) slotToKeyDel(key);
         return 1;
     } else {
@@ -89,7 +90,7 @@ void emptyDbAsync(redisDb *db) {
     db->dict = dictCreate(&dbDictType,NULL);
     db->expires = dictCreate(&keyptrDictType,NULL);
     atomicIncr(lazyfree_objects,dictSize(oldht1),
-        &lazyfree_objects_mutex);
+        lazyfree_objects_mutex);
     bioCreateBackgroundJob(BIO_LAZY_FREE,NULL,oldht1,oldht2);
 }
 
@@ -99,7 +100,7 @@ void slotToKeyFlushAsync(void) {
     zskiplist *oldsl = server.cluster->slots_to_keys;
     server.cluster->slots_to_keys = zslCreate();
     atomicIncr(lazyfree_objects,oldsl->length,
-        &lazyfree_objects_mutex);
+        lazyfree_objects_mutex);
     bioCreateBackgroundJob(BIO_LAZY_FREE,NULL,NULL,oldsl);
 }
 
@@ -107,7 +108,7 @@ void slotToKeyFlushAsync(void) {
  * updating the count of objects to release. */
 void lazyfreeFreeObjectFromBioThread(robj *o) {
     decrRefCount(o);
-    atomicDecr(lazyfree_objects,1,&lazyfree_objects_mutex);
+    atomicDecr(lazyfree_objects,1,lazyfree_objects_mutex);
 }
 
 /* Release a database from the lazyfree thread. The 'db' pointer is the
@@ -119,7 +120,7 @@ void lazyfreeFreeDatabaseFromBioThread(dict *ht1, dict *ht2) {
     size_t numkeys = dictSize(ht1);
     dictRelease(ht1);
     dictRelease(ht2);
-    atomicDecr(lazyfree_objects,numkeys,&lazyfree_objects_mutex);
+    atomicDecr(lazyfree_objects,numkeys,lazyfree_objects_mutex);
 }
 
 /* Release the skiplist mapping Redis Cluster keys to slots in the
@@ -127,5 +128,5 @@ void lazyfreeFreeDatabaseFromBioThread(dict *ht1, dict *ht2) {
 void lazyfreeFreeSlotsMapFromBioThread(zskiplist *sl) {
     size_t len = sl->length;
     zslFree(sl);
-    atomicDecr(lazyfree_objects,len,&lazyfree_objects_mutex);
+    atomicDecr(lazyfree_objects,len,lazyfree_objects_mutex);
 }
