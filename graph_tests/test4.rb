@@ -42,6 +42,5 @@ describe 'Removing edges' do
     path.last.should eq '2'
   end
 
-
 end
 

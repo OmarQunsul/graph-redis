@@ -121,7 +121,7 @@ void GraphDeleteEdge(Graph *graph, GraphEdge *graphEdge) {
   }
   listTypeReleaseIterator(li);
   // Deleting from node1 hash
-  dictDelete(node1->edges_hash, graphEdge->node2->key);
+  dictUnlink(node1->edges_hash, graphEdge->node2->key);
 
   // Deleting from node2
   li = listTypeInitIterator(graph->directed ? node2->incoming : node2->edges, 0, LIST_TAIL);
@@ -137,7 +137,7 @@ void GraphDeleteEdge(Graph *graph, GraphEdge *graphEdge) {
   listTypeReleaseIterator(li);
   if (!graph->directed) {
     // Deleting from node2 hash
-    dictDelete(node2->edges_hash, graphEdge->node1->key);
+    dictUnlink(node2->edges_hash, graphEdge->node1->key);
   }
 
   // Deleting from Graph
