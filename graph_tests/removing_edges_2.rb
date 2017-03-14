@@ -4,7 +4,7 @@ require 'redis'
 
 redis = Redis.new
 
-describe 'Minimum spanning tree' do
+describe 'Removing edges' do
 
   it 'should correctly remove edges from undirected graphs' do
     redis.flushdb
