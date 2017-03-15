@@ -904,7 +904,8 @@ void gverticesCommand(client *c) {
   current_node = graphNodes->root;
   while (current_node != NULL) {
     GraphNode *graphNode = (GraphNode *)(current_node->value);
-    addReplyBulkSds(c, graphNode->key);
+    //createStringObject(eleobj, sdslen(eleobj))
+    addReplyBulk(c, createStringObject(graphNode->key, sdslen(graphNode->key)));
     current_node = current_node->next;
   }
 
