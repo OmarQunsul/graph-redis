@@ -1894,6 +1894,7 @@ void gvertexexistsCommand(client *c);
 void gedgeexistsCommand(client *c);
 void gedgeincrbyCommand(client *c);
 void gneighboursCommand(client *c);
+void gmaxneighbourCommand(client *c);
 void gincomingCommand(client *c);
 void gcommonCommand(client *c);
 void gverticesCommand(client *c);

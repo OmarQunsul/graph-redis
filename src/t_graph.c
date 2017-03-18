@@ -596,6 +596,55 @@ void gincomingCommand(client *c) {
   return C_OK;
 }
 
+void gmaxneighbourCommand(client *c) {
+  robj *graph;
+  robj *edge_key;
+  GraphEdge *edge;
+  robj *key = c->argv[1];
+  graph = lookupKeyRead(c->db, key);
+  Graph *graph_object = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
+
+  int i;
+  robj *list = node->edges;
+  long count = listTypeLength(list);
+
+  quicklistEntry entry;
+
+  if (count == 0) {
+    addReply(c, shared.czero);
+    return C_OK;
+  } else {
+    addReplyMultiBulkLen(c, 2);
+    int max_value;
+    sds max_key = sdsempty();
+
+    for (i = 0; i < count; i++) {
+      quicklistIndex(list->ptr, i, &entry);
+      sds value;
+      value = sdsfromlonglong(entry.longval);
+      edge = GraphGetEdgeByKey(graph_object, value);
+      sdsfree(value);
+      serverAssert(edge != NULL);
+
+      if (sdslen(max_key) == 0 || edge->value >= max_value) {
+        sdsfree(max_key);
+        max_value = edge->value;
+        if (sdscmp(edge->node1->key, node->key) == 0) {
+          max_key = sdsdup(edge->node2->key);
+        } else {
+          max_key = sdsdup(edge->node1->key);
+        }
+      }
+    }
+
+    addReplyBulk(c, createStringObject(sdsdup(max_key), sdslen(max_key)));
+    addReplyLongLong(c, max_value);
+    sdsfree(max_key);
+    return C_OK;
+  }
+}
+
 void gneighboursCommand(client *c) {
   robj *graph;
   robj *edge_key;
