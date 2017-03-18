@@ -15,6 +15,11 @@ describe 'basic commands' do
     redis.gedge 'graph1', 'd', 'f', 2
   end
 
+  it "should return the correct type for the graph object key" do
+    ret = redis.type('graph1')
+    expect(ret).to eq('graph')
+  end
+
   it 'should generate correct neighbours' do
     redis.gneighbours('graph1', 'a').sort.should eq ['b', 'c']
     redis.gneighbours('graph1', 'b').should eq ['a', 'd']
