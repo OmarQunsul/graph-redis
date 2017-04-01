@@ -270,12 +270,10 @@ struct redisCommand redisCommandTable[] = {
     {"gedgeincrby",gedgeincrbyCommand,5,"wm",0,NULL,1,1,1,0,0},
     {"gvertexexists",gvertexexistsCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gedgeexists",gedgeexistsCommand,4,"r",0,NULL,1,1,1,0,0},
-    {"test",testCommand,2,"r",0,NULL,1,1,1,0,0},
     {"gvertices",gverticesCommand,2,"r",0,NULL,1,1,1,0,0},
     {"gedges",gedgesCommand,2,"r",0,NULL,1,1,1,0,0},
     {"gshortestpath",gshortestpathCommand,4,"r",0,NULL,1,1,1,0,0},
     {"gmintree",gmintreeCommand,3,"r",0,NULL,1,1,1,0,0},
-
 
 
     {"debug",debugCommand,-1,"as",0,NULL,0,0,0,0,0},

@@ -248,6 +248,7 @@ void gshortestpathCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
   Graph *graph_object = (Graph *)(graph->ptr);
 
   GraphNode *node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
@@ -434,6 +435,7 @@ void gmintreeCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
   Graph *graph_object = (Graph *)(graph->ptr);
 
   robj *graph2_key = c->argv[2];
@@ -786,6 +788,8 @@ void gvertexexistsCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *graph_node = GraphGetNode(graph_object, c->argv[2]->ptr);
   if (graph_node != NULL) {
@@ -831,6 +835,7 @@ void gedgevalueCommand(client *c) {
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
+
   GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
@@ -952,11 +957,7 @@ void gverticesCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
-
-  if (graph == NULL || checkType(c, graph, OBJ_GRAPH)) {
-    addReply(c, shared.czero);
-    return;
-  }
+  CHECK_GRAPH_EXISTS
 
   Graph *graph_object = (Graph *)(graph->ptr);
 
@@ -981,6 +982,7 @@ void gedgesCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
 
   Graph *graph_object = (Graph *)(graph->ptr);
 
@@ -1011,33 +1013,3 @@ void gedgesCommand(client *c) {
 
   return C_OK;
 }
-
-void testCommand(client *c) {
-  RETURN_OK
-}
-
-int delayedPublish(struct aeEventLoop *eventLoop, long long id, void *clientData) {
-  robj **arr = clientData;
-  robj *str1 = arr[0];
-  robj *str2 = arr[1];
-
-  int receivers = pubsubPublishMessage(str1, str2);
-  //forceCommandPropagation(c, REDIS_PROPAGATE_REPL);
-  aeDeleteTimeEvent(eventLoop, id);
-  freeStringObject(str1);
-  freeStringObject(str2);
-}
-
-
-void dpublishCommand(client *c) {
-    robj *str1 = dupStringObject(c->argv[1]);
-    robj *str2 = dupStringObject(c->argv[2]);
-    robj **arr = zmalloc(sizeof(robj *) * 2);
-    arr[0] = str1;
-    arr[1] = str2;
-    if(aeCreateTimeEvent(server.el, 20000, delayedPublish, arr, NULL) == AE_ERR) {
-
-    }
-  addReplyLongLong(c, 0);
-}
-
