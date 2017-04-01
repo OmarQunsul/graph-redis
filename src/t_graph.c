@@ -16,8 +16,24 @@
   addReplyBulk(c, value20); \
   return REDIS_OK;
 
+#define CHECK_GRAPH_OR_CREATE \
+  if (graph == NULL) { \
+    graph = createGraphObject(); \
+    dbAdd(c->db, key, graph); \
+  } else if (graph->type != OBJ_GRAPH) { \
+    addReply(c, shared.wrongtypeerr); \
+    return C_ERR; \
+  }
+
+#define CHECK_GRAPH_EXISTS \
+  if (!graph || graph->type != OBJ_GRAPH) { \
+    addReply(c, shared.wrongtypeerr); \
+    return C_ERR; \
+  }
+
 void freeGraphObject(robj *graph_object) {
-  //TODO
+  // TO IMPLEMENT
+  printf("Freeing Graph Object\n");
 }
 
 ListNode* ListNodeCreate(void* value) {
@@ -357,12 +373,6 @@ void dijkstra(client *c, Graph *graph, GraphNode *node1, GraphNode *node2) {
 
   }
 
-  /*
-  decrRefCount(distances_obj);
-  RETURN_OK;
-  return;
-  */
-
   // Building reply
 
   GraphNode *cur_node = node2;
@@ -525,6 +535,7 @@ void gsetdirectedCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyWrite(c->db, key);
+  CHECK_GRAPH_EXISTS
   Graph *graph_object = (Graph *)(graph->ptr);
   graph_object->directed = 1;
 
@@ -535,11 +546,7 @@ void gvertexCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyWrite(c->db, key);
-  robj *value;
-  if (graph == NULL) {
-    graph = createGraphObject();
-    dbAdd(c->db, key, graph);
-  }
+  CHECK_GRAPH_OR_CREATE
 
   Graph *graph_object = (Graph *)(graph->ptr);
 
@@ -565,9 +572,10 @@ void gvertexCommand(client *c) {
 void gincomingCommand(client *c) {
   robj *graph;
   robj *edge_key;
-  GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
 
@@ -599,9 +607,10 @@ void gincomingCommand(client *c) {
 void gmaxneighbourCommand(client *c) {
   robj *graph;
   robj *edge_key;
-  GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
 
@@ -648,9 +657,10 @@ void gmaxneighbourCommand(client *c) {
 void gneighboursCommand(client *c) {
   robj *graph;
   robj *edge_key;
-  GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
 
@@ -680,7 +690,6 @@ void gneighboursCommand(client *c) {
 }
 
 robj *neighboursToSet(GraphNode *node, Graph *graph_object) {
-
   // Creating neighbours set of the first node
 
   GraphEdge *edge;
@@ -718,6 +727,7 @@ void gcommonCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
   GraphNode *node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
@@ -791,6 +801,8 @@ void gedgeexistsCommand(client *c) {
   GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
   GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
@@ -816,9 +828,10 @@ void gedgeexistsCommand(client *c) {
 
 void gedgevalueCommand(client *c) {
   robj *graph;
-  GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
   GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
@@ -847,6 +860,7 @@ void gedgeCommand(client *c) {
   GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
 
   Graph *graph_object = (Graph *)(graph->ptr);
 
@@ -889,6 +903,7 @@ void gedgeremCommand(client *c) {
   GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
 
   Graph *graph_object = (Graph *)(graph->ptr);
 
@@ -910,9 +925,10 @@ void gedgeremCommand(client *c) {
 
 void gedgeincrbyCommand(client *c) {
   robj *graph;
-  GraphEdge *edge;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
   GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]);
   GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]);
