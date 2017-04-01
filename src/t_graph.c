@@ -935,8 +935,8 @@ void gedgeincrbyCommand(client *c) {
   CHECK_GRAPH_EXISTS
   GraphEdge *edge;
   Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]);
-  GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]);
+  GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
+  GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
 
   char *value_string = c->argv[4]->ptr;
   float value_float = atof(value_string);
@@ -949,7 +949,11 @@ void gedgeincrbyCommand(client *c) {
     addReplyLongLong(c, edge->value);
     return C_OK;
   } else {
-    gedgeCommand(c);
+    edge = GraphEdgeCreate(graph_node1, graph_node2, value_float);
+    GraphAddEdge(graph_object, edge);
+
+    addReplyLongLong(c, edge->value);
+    return C_OK;
   }
 }
 
