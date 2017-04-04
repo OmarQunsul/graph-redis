@@ -7,14 +7,6 @@
   addReplyBulk(c, value10); \
   decrRefCount(value10);
 
-#define RETURN_REPLY \
-  addReplyBulk(c, reply); \
-  return REDIS_OK;
-
-#define RETURN_CANCEL \
-  robj* value20 = createStringObject("Cancel", strlen("Cancel")); \
-  addReplyBulk(c, value20); \
-  return REDIS_OK;
 
 #define CHECK_GRAPH_OR_CREATE \
   if (graph == NULL) { \
@@ -252,7 +244,18 @@ void gshortestpathCommand(client *c) {
   Graph *graph_object = (Graph *)(graph->ptr);
 
   GraphNode *node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
+  if (node1 == NULL) {
+    sds err = sdsnew("Vertex not found");
+    addReplyError(c, err);
+    return C_ERR;
+  }
+
   GraphNode *node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  if (node2 == NULL) {
+    sds err = sdsnew("Vertex not found");
+    addReplyError(c, err);
+    return C_ERR;
+  }
 
   ListNode *current_node;
   current_node = graph_object->nodes->root;
@@ -383,6 +386,11 @@ void dijkstra(client *c, Graph *graph, GraphNode *node1, GraphNode *node2) {
     cur_node = cur_node->parent;
     if (cur_node != NULL)
       count++;
+    else {
+      // NO PATH
+      addReply(c, shared.czero);
+      return C_OK;
+    }
     if (sdscmp(cur_node->key, node1->key) == 0) {
       break;
     }
@@ -974,7 +982,6 @@ void gverticesCommand(client *c) {
   current_node = graphNodes->root;
   while (current_node != NULL) {
     GraphNode *graphNode = (GraphNode *)(current_node->value);
-    //createStringObject(eleobj, sdslen(eleobj))
     addReplyBulk(c, createStringObject(graphNode->key, sdslen(graphNode->key)));
     current_node = current_node->next;
   }
@@ -1000,8 +1007,6 @@ void gedgesCommand(client *c) {
   }
 
   addReplyMultiBulkLen(c, count * 3);
-
-  robj *reply = createStringObject("Done", strlen("Done"));
 
   current_node = graphEdges->root;
   while (current_node != NULL) {

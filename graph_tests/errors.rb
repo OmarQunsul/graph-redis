@@ -30,4 +30,11 @@ describe 'wrong type' do
       redis.gedge("graph1", "v1", "v2", 10)
     end.to raise_exception(Redis::CommandError, /WRONGTYPE/)
   end
+
+  it "should return of graph shortest distance asks for nodes that don't exist" do
+    redis.gvertex "graph1", "a"
+    expect do
+      path = redis.gshortestpath "graph1", "a", "b"
+    end.to raise_exception(Redis::CommandError, /Vertex not found/)
+  end
 end
