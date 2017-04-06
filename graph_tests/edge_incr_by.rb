@@ -10,7 +10,7 @@ describe 'edge increment by' do
   it "should by able to increment an existing edge" do
     ret = redis.gvertex 'graph', 'a', 'b', 'c'
     ret = redis.gedge 'graph', 'a', 'b', 0
-    expect(ret).to eq(1)
+    expect(ret).to eq(0)
     ret = redis.gedgeexists 'graph', 'a', 'b'
     expect(ret).to eq(1)
     ret = redis.gedge 'graph', 'a', 'b', 0

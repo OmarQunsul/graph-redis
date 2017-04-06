@@ -899,14 +899,14 @@ void gedgeCommand(client *c) {
 
   if (edge != NULL) {
     edge->value = value_float;
-    addReply(c, shared.czero);
+    addReplyLongLong(c, value_float);
     return C_OK;
   } else {
     edge = GraphEdgeCreate(graph_node1, graph_node2, value_float);
     GraphAddEdge(graph_object, edge);
 
     robj *value;
-    addReply(c, shared.cone);
+    addReplyLongLong(c, value_float);
     return C_OK;
   }
 }
