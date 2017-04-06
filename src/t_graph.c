@@ -968,6 +968,8 @@ void gedgeincrbyCommand(client *c) {
 void gverticesCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
+  sds pattern = c->argv[2]->ptr;
+  int plen = sdslen(pattern), allkeys;
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
@@ -976,15 +978,22 @@ void gverticesCommand(client *c) {
   List *graphNodes = graph_object->nodes;
   ListNode *current_node;
 
-  int count = graphNodes->size;
-  addReplyMultiBulkLen(c, count);
+  unsigned long numkeys = 0;
+  void *replylen = addDeferredMultiBulkLength(c);
+
+  allkeys = (pattern[0] == '*' && pattern[1] == '\0');
 
   current_node = graphNodes->root;
   while (current_node != NULL) {
     GraphNode *graphNode = (GraphNode *)(current_node->value);
-    addReplyBulk(c, createStringObject(graphNode->key, sdslen(graphNode->key)));
+    if (allkeys || stringmatchlen(pattern,plen,graphNode->key,sdslen(graphNode->key),0)) {
+      addReplyBulk(c, createStringObject(graphNode->key, sdslen(graphNode->key)));
+      numkeys += 1;
+    }
     current_node = current_node->next;
   }
+
+  setDeferredMultiBulkLength(c, replylen, numkeys);
 
   return C_OK;
 }

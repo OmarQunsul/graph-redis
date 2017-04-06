@@ -25,7 +25,7 @@ describe 'shortest path' do
   end
 
   it 'should print the correct vertices' do
-    vertices = redis.gvertices('graph1')
+    vertices = redis.gvertices('graph1', '*')
     vertices.should eq ['a', 'b', 'c']
   end
 

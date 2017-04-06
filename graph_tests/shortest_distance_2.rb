@@ -32,7 +32,7 @@ describe 'shortest path' do
   end
 
   it 'should print the correct vertices' do
-    vertices = redis.gvertices('graph1')
+    vertices = redis.gvertices('graph1', '*')
     vertices.should eq %w(a b c d e f g)
   end
 end
