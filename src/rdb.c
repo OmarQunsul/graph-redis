@@ -32,6 +32,7 @@
 #include "zipmap.h"
 #include "endianconv.h"
 
+#include "graph.h"
 #include "t_graph.h"
 
 #include <math.h>
