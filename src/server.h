@@ -1885,19 +1885,19 @@ void moduleCommand(client *c);
 void securityWarningCommand(client *c);
 
 // Graph Commands
-void gvertexCommand(client *c);
+void gnodeCommand(client *c);
 void gsetdirectedCommand(client *c);
 void gedgeCommand(client *c);
 void gedgeremCommand(client *c);
 void gedgevalueCommand(client *c);
-void gvertexexistsCommand(client *c);
+void gnodeexistsCommand(client *c);
 void gedgeexistsCommand(client *c);
 void gedgeincrbyCommand(client *c);
 void gneighboursCommand(client *c);
 void gmaxneighbourCommand(client *c);
 void gincomingCommand(client *c);
 void gcommonCommand(client *c);
-void gverticesCommand(client *c);
+void gnodesCommand(client *c);
 void gedgesCommand(client *c);
 void testCommand(client *c); // For testing purposes
 

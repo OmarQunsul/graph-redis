@@ -33,14 +33,14 @@ void gshortestpathCommand(client *c) {
 
   GraphNode *node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
   if (node1 == NULL) {
-    sds err = sdsnew("Vertex not found");
+    sds err = sdsnew("Node not found");
     addReplyError(c, err);
     return C_ERR;
   }
 
   GraphNode *node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
   if (node2 == NULL) {
-    sds err = sdsnew("Vertex not found");
+    sds err = sdsnew("Node not found");
     addReplyError(c, err);
     return C_ERR;
   }
@@ -333,7 +333,7 @@ void gsetdirectedCommand(client *c) {
   RETURN_OK
 }
 
-void gvertexCommand(client *c) {
+void gnodeCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyWrite(c->db, key);
@@ -539,7 +539,7 @@ void gcommonCommand(client *c) {
   return C_OK;
 }
 
-void gvertexexistsCommand(client *c) {
+void gnodeexistsCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
@@ -712,7 +712,7 @@ void gedgeincrbyCommand(client *c) {
   }
 }
 
-void gverticesCommand(client *c) {
+void gnodesCommand(client *c) {
   robj *graph;
   robj *key = c->argv[1];
   sds pattern = c->argv[2]->ptr;

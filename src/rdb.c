@@ -762,7 +762,7 @@ ssize_t rdbSaveObject(rio *rdb, robj *o) {
 
     } else if (o->type == OBJ_GRAPH) {
       Graph *graph_object = (Graph *)(o->ptr);
-      // Saving vertices
+      // Saving nodes
       n = rdbSaveLen(rdb, graph_object->directed ? 1 : 0);
       nwritten += n;
       n = rdbSaveLen(rdb, graph_object->nodes->size);
@@ -1386,10 +1386,10 @@ robj *rdbLoadObject(int rdbtype, rio *rdb) {
       }
 
       // Load nodes
-      int vertices_count = rdbLoadLen(rdb,NULL);
+      int nodes_count = rdbLoadLen(rdb,NULL);
       robj *o;
 
-      while(vertices_count > 0) {
+      while(nodes_count > 0) {
         if ((ele = rdbLoadEncodedStringObject(rdb)) == NULL) return NULL;
         dec = getDecodedObject(ele);
         //o = tryObjectEncoding(o);
@@ -1400,7 +1400,7 @@ robj *rdbLoadObject(int rdbtype, rio *rdb) {
         decrRefCount(dec);
         decrRefCount(ele);
 
-        vertices_count--;
+        nodes_count--;
       }
 
       // Load edges
