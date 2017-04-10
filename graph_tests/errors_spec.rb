@@ -7,12 +7,12 @@ describe 'wrong type' do
     redis.flushdb
   end
 
-  it "should return error while adding vertex to non-graph key" do
+  it "should return error while adding node to non-graph key" do
     redis.set("graph1", "value1")
     ret = redis.type('graph1')
     expect(ret).to eq('string')
     expect do
-      redis.gvertex("graph1", "v1")
+      redis.gnode("graph1", "v1")
     end.to raise_exception(Redis::CommandError, /WRONGTYPE/)
   end
 
@@ -32,9 +32,9 @@ describe 'wrong type' do
   end
 
   it "should return of graph shortest distance asks for nodes that don't exist" do
-    redis.gvertex "graph1", "a"
+    redis.gnode "graph1", "a"
     expect do
       path = redis.gshortestpath "graph1", "a", "b"
-    end.to raise_exception(Redis::CommandError, /Vertex not found/)
+    end.to raise_exception(Redis::CommandError, /Node not found/)
   end
 end

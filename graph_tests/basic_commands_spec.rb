@@ -5,7 +5,7 @@ redis = Redis.new
 describe 'basic commands' do
   before do
     redis.flushdb
-    redis.gvertex 'graph1', 'a', 'b', 'c', 'd', 'e', 'f', 'j'
+    redis.gnode 'graph1', 'a', 'b', 'c', 'd', 'e', 'f', 'j'
     redis.gedge 'graph1', 'a', 'b', 2
     redis.gedge 'graph1', 'a', 'c', 1
     redis.gedge 'graph1', 'c', 'd', 10
@@ -33,8 +33,8 @@ describe 'basic commands' do
   end
 
   it 'should tell correctly whether node exists or not' do
-    redis.gvertexexists('graph1', 'a').should eq 1
-    redis.gvertexexists('graph1', 'z').should eq 0
+    redis.gnodeexists('graph1', 'a').should eq 1
+    redis.gnodeexists('graph1', 'z').should eq 0
   end
 
   it 'should return the correct values for edges' do

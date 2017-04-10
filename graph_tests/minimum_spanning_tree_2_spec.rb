@@ -7,7 +7,7 @@ redis = Redis.new
 describe 'Minimum spanning tree' do
   it 'should calculate the correct minimum spanning tree' do
     redis.flushdb
-    redis.gvertex 'graph1', 'a', 'b', 'c', 'd'
+    redis.gnode 'graph1', 'a', 'b', 'c', 'd'
     redis.gsetdirected 'graph1'
     redis.gedge 'graph1', 'a', 'b', 1
     redis.gedge 'graph1', 'b', 'a', 4

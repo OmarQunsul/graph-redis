@@ -8,7 +8,7 @@ describe 'edge increment by' do
   end
 
   it "should by able to increment an existing edge" do
-    ret = redis.gvertex 'graph', 'a', 'b', 'c'
+    ret = redis.gnode 'graph', 'a', 'b', 'c'
     ret = redis.gedge 'graph', 'a', 'b', 0
     expect(ret).to eq(0)
     ret = redis.gedgeexists 'graph', 'a', 'b'
@@ -24,7 +24,7 @@ describe 'edge increment by' do
   end
 
   it "should create the edge with that value if it doesnt exist" do
-    ret = redis.gvertex 'graph', 'a', 'b', 'c'
+    ret = redis.gnode 'graph', 'a', 'b', 'c'
     ret = redis.gedgeexists 'graph', 'a', 'b'
     expect(ret).to eq(0)
     ret = redis.gedgeincrby 'graph', 'a', 'b', 3

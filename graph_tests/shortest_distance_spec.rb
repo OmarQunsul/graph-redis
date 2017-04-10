@@ -5,7 +5,7 @@ redis = Redis.new
 describe 'shortest path' do
   before do
     redis.flushdb
-    redis.gvertex 'graph1', 'a', 'b', 'c'
+    redis.gnode 'graph1', 'a', 'b', 'c'
     redis.gedge 'graph1', 'a', 'b', 1
     redis.gedge 'graph1', 'a', 'b', 3
     redis.gedge 'graph1', 'b', 'c', 2
@@ -24,9 +24,9 @@ describe 'shortest path' do
     @result[2].should eq 'c'
   end
 
-  it 'should print the correct vertices' do
-    vertices = redis.gvertices('graph1', '*')
-    vertices.should eq ['a', 'b', 'c']
+  it 'should print the correct nodes' do
+    nodes = redis.gnodes('graph1', '*')
+    nodes.should eq ['a', 'b', 'c']
   end
 
 end

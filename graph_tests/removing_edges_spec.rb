@@ -8,7 +8,7 @@ describe 'Removing edges' do
 
   it 'should correctly remove edges from undirected graphs' do
     redis.flushdb
-    redis.gvertex 'graph1', 'a', 'b', 'c', 'd'
+    redis.gnode 'graph1', 'a', 'b', 'c', 'd'
     redis.gedge 'graph1', 'a', 'b', 1
     redis.gedge 'graph1', 'b', 'c', 1
     redis.gedge 'graph1', 'c', 'd', 1
@@ -24,7 +24,7 @@ describe 'Removing edges' do
 
   it 'should correctly remove edges from directed graphs' do
     redis.flushdb
-    redis.gvertex 'graph1', 'a', 'b', 'c', 'd'
+    redis.gnode 'graph1', 'a', 'b', 'c', 'd'
     redis.gsetdirected 'graph1'
     redis.gedge 'graph1', 'a', 'b', 1
     redis.gedge 'graph1', 'c', 'b', 1
