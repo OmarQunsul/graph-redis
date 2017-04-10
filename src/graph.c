@@ -3,9 +3,19 @@
 #include "t_graph.h"
 #include <math.h> /* isnan(), isinf() */
 
-void freeGraphObject(robj *graph_object) {
+void freeGraphObject(robj *graph) {
+  Graph *graph_object = (Graph *)(graph->ptr);
   // TO IMPLEMENT
-  printf("Freeing Graph Object\n");
+  List *graphEdges = graph_object->edges;
+  ListNode *current_node = graphEdges->root;
+
+  // Deleting Edges
+  while (current_node != NULL) {
+    GraphEdge *graphEdge = (GraphNode *)(current_node->value);
+    GraphDeleteEdge(graph, graphEdge);
+
+    current_node = current_node->next;
+  }
 }
 
 ListNode* ListNodeCreate(void* value) {
