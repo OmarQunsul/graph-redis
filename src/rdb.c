@@ -771,7 +771,7 @@ ssize_t rdbSaveObject(rio *rdb, robj *o) {
       GraphNode *node;
       while (current != NULL) {
         node = (GraphNode *)(current->value);
-        n = rdbSaveStringObject(rdb, node->key);
+        n = rdbSaveRawString(rdb, node->key, sdslen(node->key));
         nwritten += n;
         current = current->next;
       }
@@ -783,9 +783,9 @@ ssize_t rdbSaveObject(rio *rdb, robj *o) {
       GraphEdge *edge;
       while (current != NULL) {
         edge = (GraphEdge *)(current->value);
-        n = rdbSaveStringObject(rdb, edge->node1->key);
+        n = rdbSaveRawString(rdb, edge->node1->key, sdslen(edge->node1->key));
         nwritten += n;
-        n = rdbSaveStringObject(rdb, edge->node2->key);
+        n = rdbSaveRawString(rdb, edge->node2->key, sdslen(edge->node2->key));
         nwritten += n;
 
         // Saving value
@@ -1390,30 +1390,41 @@ robj *rdbLoadObject(int rdbtype, rio *rdb) {
       robj *o;
 
       while(vertices_count > 0) {
-
-        o = rdbLoadEncodedStringObject(rdb);
+        if ((ele = rdbLoadEncodedStringObject(rdb)) == NULL) return NULL;
+        dec = getDecodedObject(ele);
         //o = tryObjectEncoding(o);
 
-        GraphNode *graph_node = GraphNodeCreate(o, 0);
+        GraphNode *graph_node = GraphNodeCreate(dec->ptr, 0);
         GraphAddNode(graph_object, graph_node);
+
+        decrRefCount(dec);
+        decrRefCount(ele);
 
         vertices_count--;
       }
 
       // Load edges
       int edges_count = rdbLoadLen(rdb, NULL);
-      robj *temp1, *temp2;
+      robj *temp1a, *temp1b, *temp2a, *temp2b;
+
       while(edges_count > 0) {
         GraphEdge *edge;
-        temp1 = rdbLoadEncodedStringObject(rdb);
-        temp2 = rdbLoadEncodedStringObject(rdb);
+        temp1a = rdbLoadEncodedStringObject(rdb);
+        temp1b = getDecodedObject(temp1a);
+        temp2a = rdbLoadEncodedStringObject(rdb);
+        temp2b = getDecodedObject(temp2a);
         double value;
         rdbLoadDoubleValue(rdb, &value);
         GraphNode *node1, *node2;
-        node1 = GraphGetNode(graph_object, temp1);
-        node2 = GraphGetNode(graph_object, temp2);
+        node1 = GraphGetNode(graph_object, temp1b->ptr);
+        node2 = GraphGetNode(graph_object, temp2b->ptr);
         edge = GraphEdgeCreate(node1, node2, value);
         GraphAddEdge(graph_object, edge);
+
+        decrRefCount(temp1a);
+        decrRefCount(temp1b);
+        decrRefCount(temp2a);
+        decrRefCount(temp2b);
 
         edges_count--;
       }
