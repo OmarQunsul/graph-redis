@@ -29,16 +29,16 @@ void gshortestpathCommand(client *c) {
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
-  GraphNode *node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
+  GraphNode *node1 = GraphGetNode(graphObject, c->argv[2]->ptr);
   if (node1 == NULL) {
     sds err = sdsnew("Node not found");
     addReplyError(c, err);
     return C_ERR;
   }
 
-  GraphNode *node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  GraphNode *node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
   if (node2 == NULL) {
     sds err = sdsnew("Node not found");
     addReplyError(c, err);
@@ -46,7 +46,7 @@ void gshortestpathCommand(client *c) {
   }
 
   ListNode *current_node;
-  current_node = graph_object->nodes->root;
+  current_node = graphObject->nodes->root;
   while (current_node != NULL) {
     GraphNode *graphNode = (GraphNode *)(current_node->value);
     graphNode->parent = NULL;
@@ -57,7 +57,7 @@ void gshortestpathCommand(client *c) {
   serverAssert(node1 != NULL);
   serverAssert(node2 != NULL);
 
-  dijkstra(c, graph_object, node1, node2);
+  dijkstra(c, graphObject, node1, node2);
 }
 
 void dijkstra(client *c, Graph *graph, GraphNode *node1, GraphNode *node2) {
@@ -225,7 +225,7 @@ void gmintreeCommand(client *c) {
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
   robj *graph2_key = c->argv[2];
 
@@ -235,7 +235,7 @@ void gmintreeCommand(client *c) {
 
   // Adding first node
   GraphNode *node, *root;
-  root = (GraphNode *)(graph_object->nodes->root->value);
+  root = (GraphNode *)(graphObject->nodes->root->value);
   node = GraphNodeCreate(root->key, 0);
   GraphAddNode(graph2_object, node);
 
@@ -256,7 +256,7 @@ void gmintreeCommand(client *c) {
     quicklistIndex(list->ptr, i, &entry);
     sds value;
     value = sdsfromlonglong(entry.longval);
-    edge = GraphGetEdgeByKey(graph_object, value);
+    edge = GraphGetEdgeByKey(graphObject, value);
     sdsfree(value);
     zslInsert(qzs->zsl, edge->value, edge->memory_key);
   }
@@ -267,7 +267,7 @@ void gmintreeCommand(client *c) {
     zskiplistNode *node;
     node = qzs->zsl->header->level[0].forward;
     if (node != NULL) {
-      GraphEdge *edge = GraphGetEdgeByKey(graph_object, node->ele);
+      GraphEdge *edge = GraphGetEdgeByKey(graphObject, node->ele);
       zslDelete(qzs->zsl, node->score, edge->memory_key, &node); // MODIFIED
       zslFreeNode(node);
       GraphNode *node1, *node2;
@@ -296,7 +296,7 @@ void gmintreeCommand(client *c) {
           GraphEdge *edge2;
           quicklistIndex(list->ptr, i, &entry);
           sds value = sdsfromlonglong(entry.longval);
-          edge2 = GraphGetEdgeByKey(graph_object, value);
+          edge2 = GraphGetEdgeByKey(graphObject, value);
           //zfree(entry);
 
           GraphNode *g2_node1 = GraphGetNode(graph2_object, edge2->node1->key);
@@ -327,8 +327,8 @@ void gsetdirectedCommand(client *c) {
   robj *key = c->argv[1];
   graph = lookupKeyWrite(c->db, key);
   CHECK_GRAPH_EXISTS
-  Graph *graph_object = (Graph *)(graph->ptr);
-  graph_object->directed = 1;
+  Graph *graphObject = (Graph *)(graph->ptr);
+  graphObject->directed = 1;
 
   RETURN_OK
 }
@@ -339,17 +339,17 @@ void gnodeCommand(client *c) {
   graph = lookupKeyWrite(c->db, key);
   CHECK_GRAPH_OR_CREATE
 
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
   int added = 0;
 
   int i;
   for (i = 2; i < (c->argc); i++) {
     sds key = sdsnew(c->argv[i]->ptr);
-    GraphNode *graph_node = GraphGetNode(graph_object, key);
+    GraphNode *graph_node = GraphGetNode(graphObject, key);
     if (graph_node == NULL) {
       graph_node = GraphNodeCreate(key, 0);
-      GraphAddNode(graph_object, graph_node);
+      GraphAddNode(graphObject, graph_node);
       added++;
     } else {
       sdsfree(key);
@@ -367,8 +367,8 @@ void gincomingCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
   GraphEdge *edge;
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
 
   // Neighbours count
   int i;
@@ -382,7 +382,7 @@ void gincomingCommand(client *c) {
     quicklistIndex(list->ptr, i, &entry);
     robj *value;
     value = sdsfromlonglong(entry.longval);
-    edge = GraphGetEdgeByKey(graph_object, value);
+    edge = GraphGetEdgeByKey(graphObject, value);
     sdsfree(value);
     serverAssert(edge != NULL);
     if (sdscmp(edge->node1->key, node->key) == 0) {
@@ -402,8 +402,8 @@ void gmaxneighbourCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
   GraphEdge *edge;
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
 
   int i;
   robj *list = node->edges;
@@ -423,7 +423,7 @@ void gmaxneighbourCommand(client *c) {
       quicklistIndex(list->ptr, i, &entry);
       sds value;
       value = sdsfromlonglong(entry.longval);
-      edge = GraphGetEdgeByKey(graph_object, value);
+      edge = GraphGetEdgeByKey(graphObject, value);
       sdsfree(value);
       serverAssert(edge != NULL);
 
@@ -452,8 +452,8 @@ void gneighboursCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
   GraphEdge *edge;
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *node = GraphGetNode(graph_object, c->argv[2]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
 
   // Neighbours count
   int i;
@@ -467,7 +467,7 @@ void gneighboursCommand(client *c) {
     quicklistIndex(list->ptr, i, &entry);
     sds value;
     value = sdsfromlonglong(entry.longval);
-    edge = GraphGetEdgeByKey(graph_object, value);
+    edge = GraphGetEdgeByKey(graphObject, value);
     sdsfree(value);
     serverAssert(edge != NULL);
     if (sdscmp(edge->node1->key, node->key) == 0) {
@@ -485,9 +485,9 @@ void gcommonCommand(client *c) {
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
-  GraphNode *node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node1 = GraphGetNode(graphObject, c->argv[2]->ptr);
+  GraphNode *node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
 
   if (node1 == NULL || node2 == NULL) {
     addReplyMultiBulkLen(c, 0);
@@ -497,8 +497,8 @@ void gcommonCommand(client *c) {
   robj *set1 = NULL;
   robj *set2 = NULL;
 
-  set1 = neighboursToSet(node1, graph_object);
-  set2 = neighboursToSet(node2, graph_object);
+  set1 = neighboursToSet(node1, graphObject);
+  set2 = neighboursToSet(node2, graphObject);
 
   if (set1 == NULL || set2 == NULL) {
     addReplyMultiBulkLen(c, 0);
@@ -545,8 +545,8 @@ void gnodeexistsCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *graph_node = GraphGetNode(graph_object, c->argv[2]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *graph_node = GraphGetNode(graphObject, c->argv[2]->ptr);
   if (graph_node != NULL) {
     addReply(c, shared.cone);
   } else {
@@ -562,9 +562,9 @@ void gedgeexistsCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
-  GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *graph_node1 = GraphGetNode(graphObject, c->argv[2]->ptr);
+  GraphNode *graph_node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
 
   // Return zero if any of the nodes is/are null
   if ((graph_node1 == NULL) || (graph_node2 == NULL)) {
@@ -575,7 +575,7 @@ void gedgeexistsCommand(client *c) {
   // Check whether the edge already exists
   edge = NULL;
   if (graph_node1 != NULL && graph_node2 != NULL)
-    edge = GraphGetEdge(graph_object, graph_node1, graph_node2);
+    edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   if (edge != NULL) {
     addReply(c, shared.cone);
@@ -592,20 +592,20 @@ void gedgevalueCommand(client *c) {
   CHECK_GRAPH_EXISTS
 
   GraphEdge *edge;
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
-  GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *graph_node1 = GraphGetNode(graphObject, c->argv[2]->ptr);
+  GraphNode *graph_node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
 
   // Return zero if any of the nodes is/are null
   if ((graph_node1 == NULL) || (graph_node2 == NULL)) {
-    addReply(c, shared.czero);
+    addReply(c, shared.nullbulk);
     return C_OK;
   }
 
   // Check whether the edge already exists
   edge = NULL;
   if (graph_node1 != NULL && graph_node2 != NULL)
-    edge = GraphGetEdge(graph_object, graph_node1, graph_node2);
+    edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   if (edge != NULL) {
     addReplyLongLong(c, edge->value);
@@ -622,7 +622,7 @@ void gedgeCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
   if (equalStringObjects(c->argv[2], c->argv[3])) {
     addReply(c, shared.czero);
@@ -632,14 +632,14 @@ void gedgeCommand(client *c) {
   sds key1 = sdsnew(c->argv[2]->ptr);
   sds key2 = sdsnew(c->argv[3]->ptr);
 
-  GraphNode *graph_node1 = GraphGetOrAddNode(graph_object, key1);
-  GraphNode *graph_node2 = GraphGetOrAddNode(graph_object, key2);
+  GraphNode *graph_node1 = GraphGetOrAddNode(graphObject, key1);
+  GraphNode *graph_node2 = GraphGetOrAddNode(graphObject, key2);
 
   sdsfree(key1);
   sdsfree(key2);
 
   // Check whether the edge already exists
-  edge = GraphGetEdge(graph_object, graph_node1, graph_node2);
+  edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   char *value_string = c->argv[4]->ptr;
   float value_float = atof(value_string);
@@ -650,7 +650,7 @@ void gedgeCommand(client *c) {
     return C_OK;
   } else {
     edge = GraphEdgeCreate(graph_node1, graph_node2, value_float);
-    GraphAddEdge(graph_object, edge);
+    GraphAddEdge(graphObject, edge);
 
     robj *value;
     addReplyLongLong(c, value_float);
@@ -665,16 +665,16 @@ void gedgeremCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
-  GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
-  GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  GraphNode *graph_node1 = GraphGetNode(graphObject, c->argv[2]->ptr);
+  GraphNode *graph_node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
 
   // Check whether the edge already exists
-  edge = GraphGetEdge(graph_object, graph_node1, graph_node2);
+  edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   if (edge) {
-    GraphDeleteEdge(graph_object, edge);
+    GraphDeleteEdge(graphObject, edge);
     addReply(c, shared.cone);
   } else {
     addReply(c, shared.czero);
@@ -689,15 +689,15 @@ void gedgeincrbyCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
   GraphEdge *edge;
-  Graph *graph_object = (Graph *)(graph->ptr);
-  GraphNode *graph_node1 = GraphGetNode(graph_object, c->argv[2]->ptr);
-  GraphNode *graph_node2 = GraphGetNode(graph_object, c->argv[3]->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *graph_node1 = GraphGetNode(graphObject, c->argv[2]->ptr);
+  GraphNode *graph_node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
 
   char *value_string = c->argv[4]->ptr;
   float value_float = atof(value_string);
 
   // Check whether the edge already exists
-  edge = GraphGetEdge(graph_object, graph_node1, graph_node2);
+  edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   if (edge != NULL) {
     edge->value += value_float;
@@ -705,7 +705,7 @@ void gedgeincrbyCommand(client *c) {
     return C_OK;
   } else {
     edge = GraphEdgeCreate(graph_node1, graph_node2, value_float);
-    GraphAddEdge(graph_object, edge);
+    GraphAddEdge(graphObject, edge);
 
     addReplyLongLong(c, edge->value);
     return C_OK;
@@ -720,17 +720,16 @@ void gnodesCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
-  List *graphNodes = graph_object->nodes;
-  ListNode *current_node;
+  List *graphNodes = graphObject->nodes;
+  ListNode *current_node = graphNodes->root;
 
   unsigned long numkeys = 0;
   void *replylen = addDeferredMultiBulkLength(c);
 
   allkeys = (pattern[0] == '*' && pattern[1] == '\0');
 
-  current_node = graphNodes->root;
   while (current_node != NULL) {
     GraphNode *graphNode = (GraphNode *)(current_node->value);
     if (allkeys || stringmatchlen(pattern,plen,graphNode->key,sdslen(graphNode->key),0)) {
@@ -751,9 +750,9 @@ void gedgesCommand(client *c) {
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
 
-  Graph *graph_object = (Graph *)(graph->ptr);
+  Graph *graphObject = (Graph *)(graph->ptr);
 
-  List *graphEdges = graph_object->edges;
+  List *graphEdges = graphObject->edges;
   ListNode *current_node = graphEdges->root;
 
   int count = 0;

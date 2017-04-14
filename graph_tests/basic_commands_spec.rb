@@ -54,4 +54,9 @@ describe 'basic commands' do
     redis.gedgeexists('graph1', 'b', 'd').should eq 1
     redis.gedgevalue('graph1', 'b', 'd').should eq 4
   end
+
+  it "should return nil for edge value that does not exist" do
+    value = redis.gedgevalue('graph1', 'a', 'g')
+    expect(value).to eq(nil)
+  end
 end

@@ -45,6 +45,7 @@ void ListAddNode(List *, ListNode *);
 
 GraphNode* GraphNodeCreate(sds key, float value);
 void GraphAddNode(Graph *graph, GraphNode *node);
+void GraphDeleteNode(Graph *graph, GraphNode *node);
 GraphNode* GraphGetNode(Graph *graph, sds key);
 int GraphNodeExists(Graph *graph, sds key);
 GraphNode* GraphGetOrAddNode(Graph *graph, sds key);

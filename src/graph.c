@@ -4,9 +4,8 @@
 #include <math.h> /* isnan(), isinf() */
 
 void freeGraphObject(robj *graph) {
-  Graph *graph_object = (Graph *)(graph->ptr);
-  // TO IMPLEMENT
-  List *graphEdges = graph_object->edges;
+  Graph *graphObject = (Graph *)(graph->ptr);
+  List *graphEdges = graphObject->edges;
   ListNode *current_node = graphEdges->root;
 
   // Deleting Edges
@@ -14,6 +13,15 @@ void freeGraphObject(robj *graph) {
     GraphEdge *graphEdge = (GraphNode *)(current_node->value);
     GraphDeleteEdge(graph, graphEdge);
 
+    current_node = current_node->next;
+  }
+
+  // Deleting Nodes
+  List *graphNodes = graphObject->nodes;
+  current_node = graphNodes->root;
+  while (current_node != NULL) {
+    GraphNode *graphNode = (GraphNode *)(current_node->value);
+    GraphDeleteNode(graphObject, graphNode);
     current_node = current_node->next;
   }
 }
@@ -74,6 +82,10 @@ void GraphAddNode(Graph *graph, GraphNode *node) {
 
   // edges hash
   serverAssert(dictAdd(graph->nodes_hash, node->key, node) == DICT_OK);
+}
+
+void GraphDeleteNode(Graph *graph, GraphNode *node) {
+  ListDeleteNode(graph->nodes, node);
 }
 
 void GraphAddEdge(Graph *graph, GraphEdge *graphEdge) {
@@ -208,6 +220,7 @@ void ListDeleteNode(List *list, void *value) {
 
   while (current != NULL) {
     if ((void *)(current->value) == value) {
+      printf("Found and deleting the node\n");
       if (previous) {
         previous->next = current->next;
       } else {
@@ -233,7 +246,7 @@ robj *createGraphObject() {
   return obj;
 }
 
-robj *neighboursToSet(GraphNode *node, Graph *graph_object) {
+robj *neighboursToSet(GraphNode *node, Graph *graphObject) {
   // Creating neighbours set of the first node
 
   GraphEdge *edge;
@@ -253,7 +266,7 @@ robj *neighboursToSet(GraphNode *node, Graph *graph_object) {
   for (i = 0; i < count; i++) {
     quicklistIndex(list->ptr, i, &entry);
     edge_key = sdsfromlonglong(entry.longval);
-    edge = GraphGetEdgeByKey(graph_object, edge_key);
+    edge = GraphGetEdgeByKey(graphObject, edge_key);
     sdsfree(edge_key);
     sds neighbour_key;
     if (sdscmp(edge->node1->key, node->key) == 0) {
