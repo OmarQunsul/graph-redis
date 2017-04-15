@@ -658,6 +658,24 @@ void gedgeCommand(client *c) {
   }
 }
 
+void gnoderemCommand(client *c) {
+  robj *graph;
+  robj *edge_key;
+  robj *key = c->argv[1];
+  graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  GraphEdge *edge;
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
+
+  if (node) {
+    GraphDeleteNode(graphObject, node);
+    addReply(c, shared.cone);
+  } else {
+    addReply(c, shared.czero);
+  }
+}
+
 void gedgeremCommand(client *c) {
   robj *graph;
   GraphEdge *edge;

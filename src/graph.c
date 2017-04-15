@@ -84,8 +84,27 @@ void GraphAddNode(Graph *graph, GraphNode *node) {
   serverAssert(dictAdd(graph->nodes_hash, node->key, node) == DICT_OK);
 }
 
-void GraphDeleteNode(Graph *graph, GraphNode *node) {
-  ListDeleteNode(graph->nodes, node);
+void GraphDeleteNode(Graph *graphObject, GraphNode *node) {
+  GraphEdge *edge;
+  int i;
+  robj *list = node->edges;
+  long count = listTypeLength(list);
+
+  quicklistEntry entry;
+
+  for (i = 0; i < count; i++) {
+    quicklistIndex(list->ptr, i, &entry);
+    sds value;
+    value = sdsfromlonglong(entry.longval);
+    edge = GraphGetEdgeByKey(graphObject, value);
+    sdsfree(value);
+    serverAssert(edge != NULL);
+    GraphDeleteEdge(graphObject, edge);
+  }
+
+  // Deleting the node
+  ListDeleteNode(graphObject->nodes, node);
+  dictUnlink(graphObject->nodes_hash, node->key);
 }
 
 void GraphAddEdge(Graph *graph, GraphEdge *graphEdge) {
@@ -115,11 +134,12 @@ void GraphDeleteEdge(Graph *graph, GraphEdge *graphEdge) {
   GraphNode *node1 = graphEdge->node1;
   GraphNode *node2 = graphEdge->node2;
 
-  li = listTypeInitIterator(node1->edges, 0, LIST_TAIL);
 
-  // Deleting from node1
   bool equal;
   robj * key;
+
+  // Deleting from node1
+  li = listTypeInitIterator(node1->edges, 0, LIST_TAIL);
   while (listTypeNext(li,&entry)) {
     key = createStringObject(graphEdge->memory_key, sdslen(graphEdge->memory_key));
     equal = listTypeEqual(&entry, key);
@@ -134,7 +154,7 @@ void GraphDeleteEdge(Graph *graph, GraphEdge *graphEdge) {
   dictUnlink(node1->edges_hash, graphEdge->node2->key);
 
   // Deleting from node2
-  li = listTypeInitIterator(graph->directed ? node2->incoming : node2->edges, 0, LIST_TAIL);
+  li = listTypeInitIterator((graph->directed == 1) ? node2->incoming : node2->edges, 0, LIST_TAIL);
   while (listTypeNext(li,&entry)) {
     key = createStringObject(graphEdge->memory_key, sdslen(graphEdge->memory_key));
     equal = listTypeEqual(&entry, key);

@@ -1886,6 +1886,7 @@ void securityWarningCommand(client *c);
 
 // Graph Commands
 void gnodeCommand(client *c);
+void gnoderemCommand(client *c);
 void gsetdirectedCommand(client *c);
 void gedgeCommand(client *c);
 void gedgeremCommand(client *c);

@@ -261,6 +261,7 @@ struct redisCommand redisCommandTable[] = {
     {"gsetdirected",gsetdirectedCommand,2,"wm",0,NULL,1,1,1,0,0},
     {"gincoming",gincomingCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gnode",gnodeCommand,-3,"wm",0,NULL,1,1,1,0,0},
+    {"gnoderem",gnoderemCommand,3,"wm",0,NULL,1,1,1,0,0},
     {"gneighbours",gneighboursCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gmaxneighbour",gmaxneighbourCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gcommon",gcommonCommand,4,"r",0,NULL,1,1,1,0,0},
@@ -274,7 +275,6 @@ struct redisCommand redisCommandTable[] = {
     {"gedges",gedgesCommand,2,"r",0,NULL,1,1,1,0,0},
     {"gshortestpath",gshortestpathCommand,4,"r",0,NULL,1,1,1,0,0},
     {"gmintree",gmintreeCommand,3,"r",0,NULL,1,1,1,0,0},
-
 
     {"debug",debugCommand,-1,"as",0,NULL,0,0,0,0,0},
     {"config",configCommand,-2,"lat",0,NULL,0,0,0,0,0},
