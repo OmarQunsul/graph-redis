@@ -664,7 +664,11 @@ void gnodeoutdegreeCommand(client *c) {
   CHECK_GRAPH_EXISTS
   Graph *graphObject = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
-  addReplyLongLong(c,listTypeLength(node->edges));
+  if (node) {
+    addReplyLongLong(c,listTypeLength(node->edges));
+  } else {
+    addReply(c, shared.nullbulk);
+  }
 }
 
 void gnodeindegreeCommand(client *c) {
@@ -674,7 +678,11 @@ void gnodeindegreeCommand(client *c) {
   CHECK_GRAPH_EXISTS
   Graph *graphObject = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
-  addReplyLongLong(c,listTypeLength(node->incoming));
+  if (node) {
+    addReplyLongLong(c,listTypeLength(node->incoming));
+  } else {
+    addReply(c, shared.nullbulk);
+  }
 }
 
 void gnoderemCommand(client *c) {

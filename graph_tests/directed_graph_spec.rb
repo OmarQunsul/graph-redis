@@ -19,6 +19,8 @@ describe 'basic commands' do
     expect(b).to eq(0)
     d = redis.gnodeoutdegree 'graph1', 'd'
     expect(d).to eq(1)
+    e = redis.gnodeoutdegree 'graph1', 'e'
+    expect(e).to eq(nil)
   end
 
   it "should calculate the indegree correctly" do
@@ -28,5 +30,7 @@ describe 'basic commands' do
     expect(b).to eq(2)
     d = redis.gnodeindegree 'graph1', 'd'
     expect(d).to eq(0)
+    e = redis.gnodeindegree 'graph1', 'e'
+    expect(e).to eq(nil)
   end
 end
