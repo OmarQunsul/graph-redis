@@ -1,6 +1,5 @@
 #include "server.h"
 #include "graph.h"
-#include "t_graph.h"
 #include <math.h> /* isnan(), isinf() */
 
 #define RETURN_OK \
@@ -658,13 +657,31 @@ void gedgeCommand(client *c) {
   }
 }
 
-void gnoderemCommand(client *c) {
+void gnodeoutdegreeCommand(client *c) {
   robj *graph;
-  robj *edge_key;
   robj *key = c->argv[1];
   graph = lookupKeyRead(c->db, key);
   CHECK_GRAPH_EXISTS
-  GraphEdge *edge;
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
+  addReplyLongLong(c,listTypeLength(node->edges));
+}
+
+void gnodeindegreeCommand(client *c) {
+  robj *graph;
+  robj *key = c->argv[1];
+  graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  Graph *graphObject = (Graph *)(graph->ptr);
+  GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
+  addReplyLongLong(c,listTypeLength(node->incoming));
+}
+
+void gnoderemCommand(client *c) {
+  robj *graph;
+  robj *key = c->argv[1];
+  graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
   Graph *graphObject = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
 

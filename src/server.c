@@ -262,6 +262,8 @@ struct redisCommand redisCommandTable[] = {
     {"gincoming",gincomingCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gnode",gnodeCommand,-3,"wm",0,NULL,1,1,1,0,0},
     {"gnoderem",gnoderemCommand,3,"wm",0,NULL,1,1,1,0,0},
+    {"gnodeindegree",gnodeindegreeCommand,3,"r",0,NULL,1,1,1,0,0},
+    {"gnodeoutdegree",gnodeoutdegreeCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gneighbours",gneighboursCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gmaxneighbour",gmaxneighbourCommand,3,"r",0,NULL,1,1,1,0,0},
     {"gcommon",gcommonCommand,4,"r",0,NULL,1,1,1,0,0},

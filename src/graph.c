@@ -1,6 +1,5 @@
 #include "server.h"
 #include "graph.h"
-#include "t_graph.h"
 #include <math.h> /* isnan(), isinf() */
 
 void freeGraphObject(robj *graph) {

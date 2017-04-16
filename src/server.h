@@ -1887,6 +1887,8 @@ void securityWarningCommand(client *c);
 // Graph Commands
 void gnodeCommand(client *c);
 void gnoderemCommand(client *c);
+void gnodeindegreeCommand(client *c);
+void gnodeoutdegreeCommand(client *c);
 void gsetdirectedCommand(client *c);
 void gedgeCommand(client *c);
 void gedgeremCommand(client *c);
@@ -1900,7 +1902,6 @@ void gincomingCommand(client *c);
 void gcommonCommand(client *c);
 void gnodesCommand(client *c);
 void gedgesCommand(client *c);
-void testCommand(client *c); // For testing purposes
 
 // Graph Algorithms
 void gshortestpathCommand(client *c);
