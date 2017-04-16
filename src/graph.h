@@ -32,11 +32,12 @@ typedef struct {
   List *nodes; //TODO: Use redis lists like the GraphNode
   List *edges; //TODO: Use redis lists like the GraphNode
   robj *nodes_hash;
-  char directed;
+  int directed;
 } Graph;
 
 robj *createGraphObject();
 Graph* GraphCreate();
+int GraphDirected(Graph* graph);
 
 List* ListCreate();
 ListNode* ListNodeCreate(void* value);
