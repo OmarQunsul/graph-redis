@@ -40,8 +40,8 @@ describe 'basic commands' do
   it 'should return the correct values for edges' do
     redis.gedgeexists('graph1', 'a', 'd').should eq 0
     redis.gedgeexists('graph1', 'a', 'c').should eq 1
-    redis.gedgevalue('graph1', 'a', 'b').should eq 2
-    redis.gedgevalue('graph1', 'd', 'c').should eq 10
+    redis.gedgevalue('graph1', 'a', 'b').should eq "2"
+    redis.gedgevalue('graph1', 'd', 'c').should eq "10"
   end
 
   it 'should be able to remove edge' do
@@ -52,11 +52,17 @@ describe 'basic commands' do
 
     redis.gedge('graph1', 'b', 'd', 4)
     redis.gedgeexists('graph1', 'b', 'd').should eq 1
-    redis.gedgevalue('graph1', 'b', 'd').should eq 4
+    redis.gedgevalue('graph1', 'b', 'd').should eq "4"
   end
 
   it "should return nil for edge value that does not exist" do
     value = redis.gedgevalue('graph1', 'a', 'g')
     expect(value).to eq(nil)
+  end
+
+  it "should handle float numbers for edge values" do
+    redis.gedge 'graph1', 'a', 'g', 1.5
+    returned_value = redis.gedgevalue 'graph1', 'a', 'g'
+    expect(returned_value).to eq("1.5")
   end
 end

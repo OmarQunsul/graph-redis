@@ -71,11 +71,11 @@ void dijkstra(client *c, Graph *graph, GraphNode *node1, GraphNode *node2) {
 
   // Main loop
   GraphNode *current_node = node1;
-  float current_node_distance;
+  double current_node_distance;
 
   current_node_distance = 0;
   int finished = 0;
-  float final_distance;
+  double final_distance;
   zskiplistNode *tmp_node = NULL;
 
   while (current_node != NULL) {
@@ -119,14 +119,14 @@ void dijkstra(client *c, Graph *graph, GraphNode *node1, GraphNode *node2) {
       if (neighbour != NULL) {
         if (neighbour->visited) continue;
 
-        float distance = edge->value + current_node_distance;
-        float neighbour_distance;
+        double distance = edge->value + current_node_distance;
+        double neighbour_distance;
 
         dictEntry *de;
         de = dictFind(distances->dict, neighbour->key);
 
         if (de != NULL) {
-          neighbour_distance = *((float *)dictGetVal(de));
+          neighbour_distance = *((double *)dictGetVal(de));
           if (distance < neighbour_distance) {
             // Deleting
             zslDelete(distances->zsl, neighbour_distance, neighbour->key, &tmp_node);
@@ -142,9 +142,9 @@ void dijkstra(client *c, Graph *graph, GraphNode *node1, GraphNode *node2) {
         } else {
           sds key3 = sdsdup(neighbour->key);
           zslInsert(distances->zsl, distance, key3);
-          float *float_loc = zmalloc(sizeof(float));
-          *float_loc = distance;
-          dictAdd(distances->dict, key3, float_loc);
+          double *double_loc = zmalloc(sizeof(double));
+          *double_loc = distance;
+          dictAdd(distances->dict, key3, double_loc);
           neighbour->parent = current_node;
         }
       }
@@ -608,9 +608,9 @@ void gedgevalueCommand(client *c) {
     edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   if (edge != NULL) {
-    addReplyLongLong(c, edge->value);
+    addReplyDouble(c, edge->value);
   } else {
-    addReply(c, shared.czero);
+    addReply(c, shared.nullbulk);
   }
   return C_OK;
 }
@@ -642,18 +642,18 @@ void gedgeCommand(client *c) {
   edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   char *value_string = c->argv[4]->ptr;
-  float value_float = atof(value_string);
+  double value_double = atof(value_string);
 
   if (edge != NULL) {
-    edge->value = value_float;
-    addReplyLongLong(c, value_float);
+    edge->value = value_double;
+    addReplyLongLong(c, value_double);
     return C_OK;
   } else {
-    edge = GraphEdgeCreate(graph_node1, graph_node2, value_float);
+    edge = GraphEdgeCreate(graph_node1, graph_node2, value_double);
     GraphAddEdge(graphObject, edge);
 
     robj *value;
-    addReplyLongLong(c, value_float);
+    addReplyDouble(c, value_double);
     return C_OK;
   }
 }
@@ -712,20 +712,20 @@ void gedgeincrbyCommand(client *c) {
   GraphNode *graph_node2 = GraphGetNode(graphObject, c->argv[3]->ptr);
 
   char *value_string = c->argv[4]->ptr;
-  float value_float = atof(value_string);
+  double value_double = atof(value_string);
 
   // Check whether the edge already exists
   edge = GraphGetEdge(graphObject, graph_node1, graph_node2);
 
   if (edge != NULL) {
-    edge->value += value_float;
-    addReplyLongLong(c, edge->value);
+    edge->value += value_double;
+    addReplyDouble(c, edge->value);
     return C_OK;
   } else {
-    edge = GraphEdgeCreate(graph_node1, graph_node2, value_float);
+    edge = GraphEdgeCreate(graph_node1, graph_node2, value_double);
     GraphAddEdge(graphObject, edge);
 
-    addReplyLongLong(c, edge->value);
+    addReplyDouble(c, edge->value);
     return C_OK;
   }
 }

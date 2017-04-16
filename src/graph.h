@@ -24,7 +24,7 @@ typedef struct {
 typedef struct {
   GraphNode *node1;
   GraphNode *node2;
-  float value;
+  double value;
   sds memory_key;
 } GraphEdge;
 
