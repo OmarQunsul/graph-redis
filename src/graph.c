@@ -42,7 +42,7 @@ List* ListCreate() {
   return list;
 }
 
-GraphNode* GraphNodeCreate(sds key, float value) {
+GraphNode* GraphNodeCreate(sds key) {
   GraphNode* graphNode = zmalloc(sizeof(GraphNode));
   graphNode->key = sdsdup(key);
   graphNode->edges = createQuicklistObject();
@@ -52,7 +52,6 @@ GraphNode* GraphNodeCreate(sds key, float value) {
 
   graphNode->edges_hash = dictCreate(&dbDictType, NULL);
   graphNode->incoming = createQuicklistObject();
-  graphNode->value = value;
   graphNode->visited = 0;
 
   // unique Node key
@@ -212,6 +211,14 @@ int GraphDirected(Graph* graph) {
   return graph->directed != 0;
 }
 
+int GraphNodesSize(Graph* graph) {
+  return graph->nodes->size;
+}
+
+int GraphEdgesSize(Graph* graph) {
+  return graph->nodes->size;
+}
+
 GraphNode* GraphGetNode(Graph *graph, sds key) {
   dictEntry *entry = dictFind(graph->nodes_hash, key);
 
@@ -221,12 +228,20 @@ GraphNode* GraphGetNode(Graph *graph, sds key) {
   return node;
 }
 
+int GraphNodeOutdegree(Graph *graph, GraphNode *node) {
+  return listTypeLength(node->edges);
+}
+
+int GraphNodeIndegree(Graph *graph, GraphNode *node) {
+  return listTypeLength(node->incoming);
+}
+
 GraphNode* GraphGetOrAddNode(Graph *graph, sds key) {
   dictEntry *entry = dictFind(graph->nodes_hash, key);
 
   GraphNode *node;
   if (entry == NULL) {
-    node = GraphNodeCreate(key, 0);
+    node = GraphNodeCreate(key);
     GraphAddNode(graph, node);
   } else {
     node = (GraphNode *)(dictGetVal(entry));

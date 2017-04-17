@@ -11,7 +11,8 @@ typedef struct {
 } List;
 
 typedef struct {
-  float value;
+  double value1;
+  double value2;
   sds key;
   robj *edges;
   dict *edges_hash;
@@ -38,25 +39,27 @@ typedef struct {
 robj *createGraphObject();
 Graph* GraphCreate();
 int GraphDirected(Graph* graph);
+int GraphNodesSize(Graph* graph);
+int GraphEdgesSize(Graph* graph);
 
 List* ListCreate();
 ListNode* ListNodeCreate(void* value);
 void ListDeleteNode(List *, void *);
 void ListAddNode(List *, ListNode *);
 
-GraphNode* GraphNodeCreate(sds key, float value);
+GraphNode* GraphNodeCreate(sds key);
 void GraphAddNode(Graph *graph, GraphNode *node);
 void GraphDeleteNode(Graph *graph, GraphNode *node);
 GraphNode* GraphGetNode(Graph *graph, sds key);
 int GraphNodeExists(Graph *graph, sds key);
 GraphNode* GraphGetOrAddNode(Graph *graph, sds key);
+int GraphNodeOutdegree(Graph *graph, GraphNode *node);
 
 GraphEdge* GraphGetEdge(Graph *graph, GraphNode *node1, GraphNode *node2);
 GraphEdge *GraphGetEdgeByKey(Graph *graph, sds key);
 GraphEdge* GraphEdgeCreate(GraphNode *node1, GraphNode *node2, float value);
 void GraphAddEdge(Graph *graph, GraphEdge *graph_edge);
 void GraphDeleteEdge(Graph *graph, GraphEdge *graphEdge);
-
 
 void freeGraphObject(robj *graph_object);
 

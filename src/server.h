@@ -1889,6 +1889,7 @@ void gnodeCommand(client *c);
 void gnoderemCommand(client *c);
 void gnodeindegreeCommand(client *c);
 void gnodeoutdegreeCommand(client *c);
+void granksCommand(client *c);
 void gsetdirectedCommand(client *c);
 void gedgeCommand(client *c);
 void gedgeremCommand(client *c);

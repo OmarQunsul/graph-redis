@@ -1393,7 +1393,7 @@ robj *rdbLoadObject(int rdbtype, rio *rdb) {
         dec = getDecodedObject(ele);
         //o = tryObjectEncoding(o);
 
-        GraphNode *graph_node = GraphNodeCreate(dec->ptr, 0);
+        GraphNode *graph_node = GraphNodeCreate(dec->ptr);
         GraphAddNode(graph_object, graph_node);
 
         decrRefCount(dec);

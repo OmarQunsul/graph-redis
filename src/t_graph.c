@@ -235,7 +235,7 @@ void gmintreeCommand(client *c) {
   // Adding first node
   GraphNode *node, *root;
   root = (GraphNode *)(graphObject->nodes->root->value);
-  node = GraphNodeCreate(root->key, 0);
+  node = GraphNodeCreate(root->key);
   GraphAddNode(graph2_object, node);
 
   // Creating a priority-queue for edges
@@ -280,7 +280,7 @@ void gmintreeCommand(client *c) {
       if (a ^ b) {
 
         // HERE: Add the new node to graph2
-        GraphNode *node_to_add = a ? GraphNodeCreate(node2->key, 0) : GraphNodeCreate(node1->key, 0);
+        GraphNode *node_to_add = a ? GraphNodeCreate(node2->key) : GraphNodeCreate(node1->key);
         GraphAddNode(graph2_object, node_to_add);
 
         // Adding the edge to graph2
@@ -347,7 +347,7 @@ void gnodeCommand(client *c) {
     sds key = sdsnew(c->argv[i]->ptr);
     GraphNode *graph_node = GraphGetNode(graphObject, key);
     if (graph_node == NULL) {
-      graph_node = GraphNodeCreate(key, 0);
+      graph_node = GraphNodeCreate(key);
       GraphAddNode(graphObject, graph_node);
       added++;
     } else {
@@ -665,7 +665,7 @@ void gnodeoutdegreeCommand(client *c) {
   Graph *graphObject = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
   if (node) {
-    addReplyLongLong(c,listTypeLength(node->edges));
+    addReplyLongLong(c,GraphNodeOutdegree(graphObject, node));
   } else {
     addReply(c, shared.nullbulk);
   }
@@ -679,9 +679,71 @@ void gnodeindegreeCommand(client *c) {
   Graph *graphObject = (Graph *)(graph->ptr);
   GraphNode *node = GraphGetNode(graphObject, c->argv[2]->ptr);
   if (node) {
-    addReplyLongLong(c,listTypeLength(node->incoming));
+    addReplyLongLong(c,GraphNodeIndegree(graphObject, node));
   } else {
     addReply(c, shared.nullbulk);
+  }
+}
+
+void granksCommand(client *c) {
+  robj *graph;
+  robj *key = c->argv[1];
+  graph = lookupKeyRead(c->db, key);
+  CHECK_GRAPH_EXISTS
+  Graph *graphObject = (Graph *)(graph->ptr);
+
+  const double DUMPING_FACTOR = 0.85;
+  int nodesCount = GraphNodesSize(graphObject);
+
+  double initialValue = 1.0 / nodesCount;
+
+  GraphNode *graphNode;
+  GraphNode *graphNode2;
+  GraphEdge *graphEdge;
+  ListNode *current_node;
+
+  // Assigning initial to the nodes
+  current_node = graphObject->nodes->root;
+  while (current_node != NULL) {
+    graphNode = (GraphNode *)(current_node->value);
+    graphNode->value1 = initialValue;
+    graphNode->value2 = 0.0;
+    current_node = current_node->next;
+  }
+
+  // Loops
+  const int LOOPS = 50;
+  for (int i = 0; i < LOOPS; i++) {
+    // Calculating
+    current_node = graphObject->edges->root;
+    while (current_node != NULL) {
+      graphEdge = (GraphEdge *)(current_node->value);
+      graphNode = graphEdge->node1;
+      graphNode2 = graphEdge->node2;
+      graphNode2->value2 += (graphNode->value1 / GraphNodeOutdegree(graphObject, graphNode));
+      current_node = current_node->next;
+    }
+
+    // Reseting values
+    current_node = graphObject->nodes->root;
+    while (current_node != NULL) {
+      graphNode = (GraphNode *)(current_node->value);
+      graphNode->value1 = (1 - DUMPING_FACTOR) / nodesCount + DUMPING_FACTOR * graphNode->value2;
+      graphNode->value2 = 0.0;
+      current_node = current_node->next;
+    }
+  }
+
+  addReplyMultiBulkLen(c, nodesCount * 2);
+
+  current_node = graphObject->nodes->root;
+  while (current_node != NULL) {
+    graphNode = (GraphNode *)(current_node->value);
+    robj *reply1 = createStringObject(graphNode->key, sdslen(graphNode->key));
+    addReplyBulk(c, reply1);
+    addReplyDouble(c, graphNode->value1);
+
+    current_node = current_node->next;
   }
 }
 
@@ -808,7 +870,7 @@ void gedgesCommand(client *c) {
 
   current_node = graphEdges->root;
   while (current_node != NULL) {
-    GraphEdge *graphEdge = (GraphNode *)(current_node->value);
+    GraphEdge *graphEdge = (GraphEdge *)(current_node->value);
     robj *reply1 = createStringObject(graphEdge->node1->key, sdslen(graphEdge->node1->key));
     addReplyBulk(c, reply1);
     robj *reply2 = createStringObject(graphEdge->node2->key, sdslen(graphEdge->node2->key));
