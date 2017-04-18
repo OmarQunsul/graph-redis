@@ -18,10 +18,6 @@ RUN mkdir /data && chown redis:redis /data
 VOLUME /data
 WORKDIR /data
 
-#COPY docker-entrypoint.sh /usr/local/bin/
-#RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
-#ENTRYPOINT ["docker-entrypoint.sh"]
-
 RUN mkdir -p /etc/redis
 ADD *.conf /etc/redis/
 
