@@ -20,7 +20,6 @@ describe 'basic commands' do
 
   it "should calculate the correct page rank values" do
     ret = redis.granks 'graph1'
-
-    puts ret.inspect
+    # TODO
   end
 end

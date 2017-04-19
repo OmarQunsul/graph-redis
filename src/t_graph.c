@@ -645,7 +645,7 @@ void gedgeCommand(client *c) {
 
   if (edge != NULL) {
     edge->value = value_double;
-    addReplyLongLong(c, value_double);
+    addReplyDouble(c, value_double);
     return C_OK;
   } else {
     edge = GraphEdgeCreate(graph_node1, graph_node2, value_double);
