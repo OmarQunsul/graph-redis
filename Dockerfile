@@ -1,10 +1,8 @@
-FROM debian:jessie-slim
+FROM debian:stable-slim
 
 RUN groupadd -r redis && useradd -r -g redis redis
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates \
-		wget \
     build-essential \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -14,9 +12,7 @@ COPY Makefile /usr/src/redis/
 COPY *.conf /usr/src/redis/
 WORKDIR /usr/src/redis
 
-RUN make distclean
-RUN make
-RUN make install
+RUN make && make install && make clean
 
 RUN mkdir /data && chown redis:redis /data
 VOLUME /data
