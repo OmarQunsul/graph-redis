@@ -3,7 +3,7 @@ FROM debian:stable-slim
 RUN groupadd -r redis && useradd -r -g redis redis
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+    gcc make libc6-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY src/ /usr/src/redis/src/
