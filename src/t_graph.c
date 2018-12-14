@@ -712,7 +712,7 @@ void granksCommand(client *c) {
   }
 
   // Loops
-  const int LOOPS = 50;
+  const int LOOPS = 100;
   for (int i = 0; i < LOOPS; i++) {
     // Calculating
     current_node = graphObject->edges->root;

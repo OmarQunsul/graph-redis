@@ -35,7 +35,7 @@ ListNode* ListNodeCreate(void* value) {
 }
 
 List* ListCreate() {
-  List* list = zmalloc(sizeof(List));
+  List* list = (List *)zmalloc(sizeof(List));
   list->root = NULL;
   list->tail = NULL;
   list->size = 0;
@@ -43,7 +43,7 @@ List* ListCreate() {
 }
 
 GraphNode* GraphNodeCreate(sds key) {
-  GraphNode* graphNode = zmalloc(sizeof(GraphNode));
+  GraphNode* graphNode = (GraphNode *)zmalloc(sizeof(GraphNode));
   graphNode->key = sdsdup(key);
   graphNode->edges = createQuicklistObject();
 
